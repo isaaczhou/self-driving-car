@@ -1,0 +1,23 @@
+#+TITLE: Udacity Self Driving Car
+#+AUTHOR: Isaac Zhou
+#+DATE: <2018-03-06 Tue>
+#+EMAIL: isaaczhou85@gmail.com
+
+* Description
+  - This repo is to show case my work while taking Udacity's Self Driving Car Nanodegree
+
+* Tools
+
+** Emacs + Org Mode + ob-ipython
+
+** Jupyter Notebook when needed
+
+** Ubuntu 16.04 LTS
+
+** XiaoMi Notebook Pro
+
+*** CORE i7-8550U
+*** Nvidia MX150 GPU
+*** 16 GB
+
+* Term1: Computer Vision and Deep Learning
