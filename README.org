@@ -8,7 +8,13 @@
 
 * Tools
 
-** Emacs + Org Mode + ob-ipython
+** Emacs
+   - my emacs [[https://github.com/isaaczhou/dotfiles][config for Ubuntu]]
+   - I do have a separate [[https://github.com/isaaczhou/.emacs.d][config for my Macbook Air]]
+
+** Org Mode
+
+** ob-ipython
 
 ** Jupyter Notebook when needed
 
