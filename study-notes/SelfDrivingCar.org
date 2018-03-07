@@ -732,3 +732,18 @@ np.matmul(X, W)
 :END:
 *** Error Functions
 **** Log-loss Error Function
+*** 
+
+#+BEGIN_SRC ipython :session :file  :exports both :results raw drawer
+import numpy as np
+import matplotlib.pyplot as plt
+%matplotlib inline
+
+plt.plot(np.random.randn(10));
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[2]:
+[[file:./obipy-resources/18029Yqf.png]]
+:END:
