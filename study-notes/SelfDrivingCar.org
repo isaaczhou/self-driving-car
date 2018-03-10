@@ -857,5 +857,19 @@ cross_entropy([1,0,1,1],[0.4,0.45,0.6,0.5])
      - Goal: minimize error function
        [[./resources/minimize-error-function.png]]
 
-     - 
 *** Gradient Descent
+    - Stepwise gradient descent
+      [[./resources/stepwise-gradient-descent.png]]
+
+    - Gradient Descent Calculation Visuals
+      [[./resources/gradient-descent-calculation.png]]
+
+
+**** Gradient Calculation
+     - In order to minimize the error function, we need to take some derivatives
+     - The sigmoid function has a really nice derivative
+       [[./resources/sigmoid-function-derivative.png]]
+
+       [[./resources/sigmoid-function-derivative.gif]]
+
+     - 
