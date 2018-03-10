@@ -906,5 +906,4 @@ cross_entropy([1,0,1,1],[0.4,0.45,0.6,0.5])
      - similarly it updates the bias the similar way:
        [[./resources/gradient-descent-step-bias.png]]
      - Note: Since we've taken the average of the errors, the term we are adding should be 1/m * alpha instead alpha, but as alphaα is a constant, then in order to simplify calculations, we'll just take 1/m * alpha to be our learning rate, and abuse the notation by just calling it alpha
-
-
+*** 
