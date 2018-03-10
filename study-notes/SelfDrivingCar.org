@@ -785,3 +785,49 @@ softmax([1,2,3,4,5])
 :END:
 *** One-Hot Encoding
 [[./resources/one-hot-encoding.png]]
+*** Maximum Likelihood
+    - Maximize the probability to pick the best model
+    - The model classifies most points correctly with P(all) indicating how accurate the model is
+*** Maximizing Probabilities
+    - probability
+    - error function
+    - minimize the error function <=> maximize the probability?
+    - want to avoid products, what's better than products? ==> sums
+*** Cross Entropy
+    - sum(-ln(p))
+    - high cross entroy is bad
+    - the goal is to minize the cross entropy
+    - There's definitely a connection between probabilities and error functions, and it's called Cross-Entropy.
+    - This concept is tremendously popular in many fields, including Machine Learning. 
+**** Formula
+     - CE = - sum(yi * ln(pi)+(1-yi)*ln(1-pi)); yi is binary and pi is probability
+
+     - Cross Entropy Table [[./resources/cross-entropy.png]]
+
+     - Cross-Entropy Formula [[./resources/cross-entropy-formula.png]]
+**** Code
+#+BEGIN_SRC ipython :session :file  :exports both :results raw drawer
+import numpy as np
+
+# Write a function that takes as input two lists Y, P,
+# and returns the float corresponding to their cross-entropy.
+def cross_entropy(Y, P):
+	results_list = [y*np.log(p)+(1-y)*np.log(1-p) for (y,p) in zip(Y, P)]
+	results = -np.sum(results_list)
+	return results
+
+cross_entropy([1,0,1,1],[0.4,0.45,0.6,0.5])
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[19]:
+: 2.7181005369557116
+:END:
+*** Multi-Class Cross Entropy
+    - Multi-class cross entropy, the sum of columns should be 1 [[./resources/multi-class-cross-entropy-col-sum.png]]
+    - Calculate the multi-class cross entropy [[./resources/multi-class-cross-entropy-demo.png]]
+
+    - The formula for multi-class cross entropy [[./resources/multi-class-cross-entropy-formula.png]]
+
+    - cross-entropy is inversely proportional to the total probability of an outcome
