@@ -868,8 +868,153 @@ cross_entropy([1,0,1,1],[0.4,0.45,0.6,0.5])
 **** Gradient Calculation
      - In order to minimize the error function, we need to take some derivatives
      - The sigmoid function has a really nice derivative
-       [[./resources/sigmoid-function-derivative.png]]
-
        [[./resources/sigmoid-function-derivative.gif]]
 
-     - 
+     - The error formula for m points is
+       [[./resources/error-formula-for-m-points.png]]
+
+     - The goal is to calculate the gradient of E, at a point x = (x1,...,xn), given by the partial derivatives
+       [[./resources/partial-derivatives.png]]
+
+     - To simplify our calculations, we'll actually think of the error that each point produces, and calculate the derivative of this error. The total error, then, is the average of the errors at all the points.
+
+       + The error produced by each point is
+         [[./resources/error-produced-by-each-point.png]]
+
+       + In order to calculate the derivative of this error with respect to the weight, we'll first calculate the partial derivative to weight. so:
+         [[./resources/partial-derivatives-weight.gif]]
+
+       + The last equality is because the only term in the sum which is not a constant with respect to wj is precisely wjxj, which has a derivative of xj
+
+       + Now, we can go ahead and calculate the derivative of the error E at a point x, with respect to the weight w_j
+         [[./resources/partial-derivatives-weight.gif]]
+
+       + Similarly
+         [[./resources/partial-derivatives-weight-similar.gif]]
+       + This actually tells us something very important. For a point with coordinates (x1,...,xn), label y and prediction yhat, the gradient of the error function at that point is (-(y-yhat)*x1, ..., -(y-yhat)*xn, -(y-yhat))
+       + In summary the gradient is
+         [[./resources/summary-gradient.png]]
+       + The gradient is actually a scalar times the coordinates of the point! And what is the scalar? Nothing less than a multiple of the difference between the label and the prediction.
+       + If a point is well classified, we will get a small gradient. And if it's poorly classified, the gradient will be quite large.
+       + So, a small gradient means we'll change our coordinates by a little bit, and a large gradient means we'll change our coordinates by a lot.
+​	
+**** Gradient Descent Step
+     - Therefore, since the gradient descent step simply consists in subtracting a multiple of the gradient of the error function at every point, then this updates the weights in the following way:
+       [[./resources/gradient-descent-step1.png]]
+     - which is equivalent to:
+       [[./resources/gradient-descent-step2.png]]
+     - similarly it updates the bias the similar way:
+       [[./resources/gradient-descent-step-bias.png]]
+     - Note: Since we've taken the average of the errors, the term we are adding should be 1/m * alpha instead alpha, but as alphaα is a constant, then in order to simplify calculations, we'll just take 1/m * alpha to be our learning rate, and abuse the notation by just calling it alpha
+
+*** Logistic Regression Algorithm
+
+**** Gradient Descent Algorithm
+     - Gradient Descent Algorithm
+       [[./resources/gradient-descent-algorithm.png]]
+
+**** Coding the Logistic Regression Algorithm
+     - write the code for the functions dErrors and gradientDescentStep, which do the following:
+       + dErrors: This function should receive X and y, and return a list of errors given by the formula for the gradient -(y-yhat)*(x1,...,xn)
+       + gradientDescentStep: In this function, you receive X, y,W and b, and you need to upgrade the weights and the bias by subtracting the coordinates of the gradient, given in the function dErrors.
+
+***** Code
+
+****** Initial setup
+#+BEGIN_SRC ipython :session :file  :exports both :results raw drawer
+import numpy as np
+# Setting the random seed, feel free to change it and see different solutions.
+np.random.seed(42)
+
+# TODO: Define the data path
+data_path = "./data/gradient-descent/data.csv"
+
+def sigmoid(x):
+    return 1/(1+np.exp(-x))
+def sigmoid_prime(x):
+    return sigmoid(x)*(1-sigmoid(x))
+
+def prediction(X, W, b):
+    return sigmoid(np.matmul(X,W)+b)
+
+def error_vector(y, y_hat):
+    return [-y[i]*np.log(y_hat[i]) - (1-y[i])*np.log(1-y_hat[i]) for i in range(len(y))]
+
+def error(y, y_hat):
+    ev = error_vector(y, y_hat)
+    return sum(ev)/len(ev)
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[14]:
+:END:
+
+****** Gradient of the error function
+
+#+BEGIN_SRC ipython :session :file  :exports both :results raw drawer
+# TODO: Fill in the code below to calculate the gradient of the error function.
+# The result should be a list of three lists:
+# The first list should contain the gradient (partial derivatives) with respect to w1
+# The second list should contain the gradient (partial derivatives) with respect to w2
+# The third list should contain the gradient (partial derivatives) with respect to b
+def dErrors(X, y, y_hat):
+    DErrorsDx1 = [-(y[i] - y_hat[i])*X[i][0] for i in range(len(y))]
+    DErrorsDx2 = [-(y[i] - y_hat[i])*X[i][1] for i in range(len(y))]
+    DErrorsDb = [-(y[i] - y_hat[i]) for i in range(len(y))]
+    return DErrorsDx1, DErrorsDx2, DErrorsDb
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[20]:
+:END:
+
+****** Gradient Descent Step
+#+BEGIN_SRC ipython :session :file  :exports both :results raw drawer
+# TODO: Fill in the code below to implement the gradient descent step.
+# The function should receive as inputs the data X, the labels y,
+# the weights W (as an array), and the bias b.
+# It should calculate the prediction, the gradients, and use them to
+# update the weights and bias W, b. Then return W and b.
+# The error e will be calculated and returned for you, for plotting purposes.
+def gradientDescentStep(X, y, W, b, learn_rate = 0.01):
+    # TODO: Calculate the prediction
+    y_hat = prediction(X,W,b)
+    # TODO: Calculate the gradient
+    derivErrors = dErrors(X, y, y_hat)
+    W[0] -= sum(derivErrors[0])*learn_rate
+    W[1] -= sum(derivErrors[1])*learn_rate
+    b -= sum(derivErrors[2])*learn_rate
+    # This calculates the error
+    e = error(y, y_hat)
+    return W, b, e
+#+END_SRC
+
+****** Run the perceptron
+
+    #+BEGIN_SRC ipython :session :file  :exports both :results raw drawer
+# This function runs the perceptron algorithm repeatedly on the dataset,
+# and returns a few of the boundary lines obtained in the iterations,
+# for plotting purposes.
+# Feel free to play with the learning rate and the num_epochs,
+# and see your results plotted below.
+def trainLR(X, y, learn_rate = 0.01, num_epochs = 100):
+    x_min, x_max = min(X.T[0]), max(X.T[0])
+    y_min, y_max = min(X.T[1]), max(X.T[1])
+    # Initialize the weights randomly
+    W = np.array(np.random.rand(2,1))*2 -1
+    b = np.random.rand(1)[0]*2 - 1
+    # These are the solution lines that get plotted below.
+    boundary_lines = []
+    errors = []
+    for i in range(num_epochs):
+        # In each epoch, we apply the gradient descent step.
+        W, b, error = gradientDescentStep(X, y, W, b, learn_rate)
+        boundary_lines.append((-W[0]/W[1], -b/W[1]))
+        errors.append(error)
+    return boundary_lines, errors
+    #+END_SRC
+
+*** Gradient Descent: The Code
+
