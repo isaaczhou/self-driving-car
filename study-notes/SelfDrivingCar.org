@@ -732,18 +732,58 @@ np.matmul(X, W)
 :END:
 *** Error Functions
 **** Log-loss Error Function
-*** 
-
+*** Discrete vs. Continuous
+    - In the last few videos, we learned that continuous error functions are better than discrete error functions, when it comes to optimizing. For this, we need to switch from discrete to continuous predictions.
+**** Quiz
+     - The sigmoid function is defined as sigmoid(x) = 1/(1+e**(-x)), If the score is defined by 4x1 + 5x2 - 9 = score, then which of the following points has exactly a 50% probability of being blue or red?
 #+BEGIN_SRC ipython :session :file  :exports both :results raw drawer
 import numpy as np
-import matplotlib.pyplot as plt
-%matplotlib inline
+# lambda doesn't need def
+sigmoid = lambda x: 1/(1+np.exp(-x))
+linear = lambda x,y: 4*x +5*y -9
 
-plt.plot(np.random.randn(10));
+print(sigmoid(linear(1,1)))
+print(sigmoid(linear(2,4)))
+print(sigmoid(linear(5,5)))
+print(sigmoid(linear(-4,5)))
 #+END_SRC
 
 #+RESULTS:
 :RESULTS:
-# Out[2]:
-[[file:./obipy-resources/18029Yqf.png]]
+# Out[13]:
 :END:
+*** Multi-Class Classification and Softmax
+**** The Softmax Function
+     - exponential function turns every number into positive number
+     - Linear function scores: Z1, Z2,..., Zn
+     - P(class i) = e ** (Zi) / (e ** Z1+e**Z2+...+e**Zn))
+     - Softmax for n=2 values the same as the sigmoid function
+**** Coding Softmax
+#+BEGIN_SRC ipython :session :file  :exports both :results raw drawer
+import numpy as np
+
+def softmax(L):
+	all_elements = [np.exp(i) for i in L]
+	results = [e/np.sum(all_elements) for e in all_elements]
+	return results
+
+softmax([1,2,3,4,5])
+#+END_SRC
+
+#+RESULTS:
+:RESULTS:
+# Out[17]:
+#+BEGIN_EXAMPLE
+  [0.011656230956039607,
+  0.031684920796124269,
+  0.086128544436268703,
+  0.23412165725273662,
+  0.63640864655883078]
+#+END_EXAMPLE
+:END:
+*** One-Hot Encoding
+[[./resources/one-hot-encoding.jpg]]
+
+
+
+
