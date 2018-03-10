@@ -837,3 +837,25 @@ cross_entropy([1,0,1,1],[0.4,0.45,0.6,0.5])
 
     - cross-entropy is inversely proportional to the total probability of an outcome
     - the higher the CE, the lower the probability of an outcome
+
+*** Logistic Regression
+
+**** The Algorithm
+     - Take your data
+     - Pick a random model
+     - Calculate the error
+     - Minimize the error and obtain a better model
+
+**** Calculating the Error Function
+     - Error function walk-through
+     [[./resources/error-function-walk-through.png]]
+
+     - y hat is the sigmoid of function(W,b), the error function(W,b) will be
+       [[./resources/error-function-formula-sigmoid.png]]
+
+**** Minimize the error function
+     - Goal: minimize error function
+       [[./resources/minimize-error-function.png]]
+
+     - 
+*** Gradient Descent
