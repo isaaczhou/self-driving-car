@@ -1,7 +1,7 @@
 #+TITLE: Self-Driving Car Nanodegree Study Notes
 #+AUTHOR: Isaac Zhou
 #+OPTIONS: toc:3
-#+TOC: listings
+#+TOC: headlines 3
 
 * Computer Vision and Deep Learning
 ** Computer Vision Fundamentals
