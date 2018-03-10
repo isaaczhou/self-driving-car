@@ -1,4 +1,5 @@
 #+TITLE: Self-Driving Car Nanodegree
+#+OPTIONS: toc:3
 
 * Computer Vision and Deep Learning
 ** Computer Vision Fundamentals
@@ -783,7 +784,3 @@ softmax([1,2,3,4,5])
 :END:
 *** One-Hot Encoding
 [[./resources/one-hot-encoding.png]]
-
-
-
-
