@@ -782,7 +782,8 @@ softmax([1,2,3,4,5])
 #+END_EXAMPLE
 :END:
 *** One-Hot Encoding
-[[./resources/one-hot-encoding.jpg]]
+[[./resources/one-hot-encoding.png]]
+
 
 
 
