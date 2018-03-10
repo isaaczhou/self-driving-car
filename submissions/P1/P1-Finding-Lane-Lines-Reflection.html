@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="en">
+<head>
+<title>Reflection: Finding Lane Lines on the Road</title>
+<!-- 2018-02-18 Sun 20:06 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="generator" content="Org-mode">
+<meta name="author" content="Isaac Zhou">
+
+<link  href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<style type="text/css">
+/* org mode styles on top of twbs */
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    font-size: 18px;
+    margin-bottom: 105px;
+}
+
+footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 101px;
+    background-color: #f5f5f5;
+}
+
+footer > div {
+    padding: 10px;
+}
+
+footer p {
+    margin: 0 0 5px;
+    text-align: center;
+    font-size: 16px;
+}
+
+#table-of-contents {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+blockquote p {
+    font-size: 18px;
+}
+
+pre {
+    font-size: 16px;
+}
+
+.footpara {
+    display: inline-block;
+}
+
+figcaption {
+  font-size: 16px;
+  color: #666;
+  font-style: italic;
+  padding-bottom: 15px;
+}
+
+/* from twbs docs */
+
+.bs-docs-sidebar.affix {
+    position: static;
+}
+@media (min-width: 768px) {
+    .bs-docs-sidebar {
+        padding-left: 20px;
+    }
+}
+
+/* All levels of nav */
+.bs-docs-sidebar .nav > li > a {
+    display: block;
+    padding: 4px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #999;
+}
+.bs-docs-sidebar .nav > li > a:hover,
+.bs-docs-sidebar .nav > li > a:focus {
+    padding-left: 19px;
+    color: #A1283B;
+    text-decoration: none;
+    background-color: transparent;
+    border-left: 1px solid #A1283B;
+}
+.bs-docs-sidebar .nav > .active > a,
+.bs-docs-sidebar .nav > .active:hover > a,
+.bs-docs-sidebar .nav > .active:focus > a {
+    padding-left: 18px;
+    font-weight: bold;
+    color: #A1283B;
+    background-color: transparent;
+    border-left: 2px solid #A1283B;
+}
+
+/* Nav: second level (shown on .active) */
+.bs-docs-sidebar .nav .nav {
+    display: none; /* Hide by default, but at >768px, show it */
+    padding-bottom: 10px;
+}
+.bs-docs-sidebar .nav .nav > li > a {
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 30px;
+    font-size: 12px;
+    font-weight: normal;
+}
+.bs-docs-sidebar .nav .nav > li > a:hover,
+.bs-docs-sidebar .nav .nav > li > a:focus {
+    padding-left: 29px;
+}
+.bs-docs-sidebar .nav .nav > .active > a,
+.bs-docs-sidebar .nav .nav > .active:hover > a,
+.bs-docs-sidebar .nav .nav > .active:focus > a {
+    padding-left: 28px;
+    font-weight: 500;
+}
+
+/* Nav: third level (shown on .active) */
+.bs-docs-sidebar .nav .nav .nav {
+    padding-bottom: 10px;
+}
+.bs-docs-sidebar .nav .nav .nav > li > a {
+    padding-top: 1px;
+    padding-bottom: 1px;
+    padding-left: 40px;
+    font-size: 12px;
+    font-weight: normal;
+}
+.bs-docs-sidebar .nav .nav .nav > li > a:hover,
+.bs-docs-sidebar .nav .nav .nav > li > a:focus {
+    padding-left: 39px;
+}
+.bs-docs-sidebar .nav .nav .nav > .active > a,
+.bs-docs-sidebar .nav .nav .nav > .active:hover > a,
+.bs-docs-sidebar .nav .nav .nav > .active:focus > a {
+    padding-left: 38px;
+    font-weight: 500;
+}
+
+/* Show and affix the side nav when space allows it */
+@media (min-width: 992px) {
+    .bs-docs-sidebar .nav > .active > ul {
+        display: block;
+    }
+    /* Widen the fixed sidebar */
+    .bs-docs-sidebar.affix,
+    .bs-docs-sidebar.affix-bottom {
+        width: 213px;
+    }
+    .bs-docs-sidebar.affix {
+        position: fixed; /* Undo the static from mobile first approach */
+        top: 20px;
+    }
+    .bs-docs-sidebar.affix-bottom {
+        position: absolute; /* Undo the static from mobile first approach */
+    }
+    .bs-docs-sidebar.affix .bs-docs-sidenav,.bs-docs-sidebar.affix-bottom .bs-docs-sidenav {
+        margin-top: 0;
+        margin-bottom: 0
+    }
+}
+@media (min-width: 1200px) {
+    /* Widen the fixed sidebar again */
+    .bs-docs-sidebar.affix-bottom,
+    .bs-docs-sidebar.affix {
+        width: 263px;
+    }
+}
+</style>
+<script type="text/javascript">
+$(function() {
+    'use strict';
+
+    $('.bs-docs-sidebar li').first().addClass('active');
+
+    $(document.body).scrollspy({target: '.bs-docs-sidebar'});
+
+    $('.bs-docs-sidebar').affix();
+});
+</script>
+</head>
+<body>
+<div id="content" class="container">
+<div class="row"><div class="col-md-9"><h1 class="title">Reflection: Finding Lane Lines on the Road</h1>
+<div id="outline-container-sec-1" class="outline-2">
+<h2 id="sec-1"><span class="section-number-2">1</span> Goal</h2>
+<div class="outline-text-2" id="text-1">
+<p>
+The goals/steps of this project are the following:
+</p>
+</div>
+<div id="outline-container-sec-1-1" class="outline-3">
+<h3 id="sec-1-1"><span class="section-number-3">1.1</span> Build a Pipeline</h3>
+<div class="outline-text-3" id="text-1-1">
+<p>
+Make a pipeline that finds lane lines on the road
+</p>
+</div>
+</div>
+<div id="outline-container-sec-1-2" class="outline-3">
+<h3 id="sec-1-2"><span class="section-number-3">1.2</span> Reflection</h3>
+<div class="outline-text-3" id="text-1-2">
+<p>
+Reflect on your work in a written report
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-2" class="outline-2">
+<h2 id="sec-2"><span class="section-number-2">2</span> Build a Pipeline</h2>
+<div class="outline-text-2" id="text-2">
+<ul class="org-ul">
+<li>Describe your pipeline. As part of the description, explain how you modified the draw<sub>lines</sub>() function.
+</li>
+<li>My pipeline consisted of the following steps
+</li>
+</ul>
+</div>
+
+<div id="outline-container-sec-2-1" class="outline-3">
+<h3 id="sec-2-1"><span class="section-number-3">2.1</span> Convert to Greyscale</h3>
+<div class="outline-text-3" id="text-2-1">
+<ul class="org-ul">
+<li>The first step is to convert the images to the grayscale
+</li>
+<li>Use the provided grayscale function
+</li>
+<li>The results are shown as below
+</li>
+</ul>
+
+<figure>
+<p><img src="file:///home/isaac/Dropbox/udacity/CarND-LaneLines-P1/reflections/grayscale.png" class="img-responsive" alt="grayscale.png">
+</p>
+</figure>
+</div>
+</div>
+
+<div id="outline-container-sec-2-2" class="outline-3">
+<h3 id="sec-2-2"><span class="section-number-3">2.2</span> Apply Gaussian Smoothing on the Gray Image</h3>
+<div class="outline-text-3" id="text-2-2">
+<ul class="org-ul">
+<li>Then apply the Gaussian Smoothing to suppress the noise
+</li>
+<li>Use the provided gaussian<sub>blur</sub> function, apply the kernel of 9
+</li>
+<li>The results are shown as below
+</li>
+</ul>
+
+<figure>
+<p><img src="file:///home/isaac/Dropbox/udacity/CarND-LaneLines-P1/reflections/gaussian.png" class="img-responsive" alt="gaussian.png">
+</p>
+</figure>
+</div>
+</div>
+
+<div id="outline-container-sec-2-3" class="outline-3">
+<h3 id="sec-2-3"><span class="section-number-3">2.3</span> Canny Edge</h3>
+<div class="outline-text-3" id="text-2-3">
+<ul class="org-ul">
+<li>Use canny edge to identify the boundaries of an object in an image
+</li>
+<li>Use the provided canny function, from the class I learnt the ratio of low<sub>threshold</sub> to high<sub>threshold</sub> of 1:2 or 1:3 is recommended by John Canny. So I use the low threshold of 100 and high threshold of 200
+</li>
+<li>The results are shown as below
+</li>
+</ul>
+
+<figure>
+<p><img src="file:///home/isaac/Dropbox/udacity/CarND-LaneLines-P1/reflections/cannyedge.png" class="img-responsive" alt="cannyedge.png">
+</p>
+</figure>
+</div>
+</div>
+
+<div id="outline-container-sec-2-4" class="outline-3">
+<h3 id="sec-2-4"><span class="section-number-3">2.4</span> Select Area of Interest</h3>
+<div class="outline-text-3" id="text-2-4">
+<ul class="org-ul">
+<li>Define a region of interest based by tweaking vertices
+</li>
+<li>Use region<sub>of</sub><sub>interest</sub> function, which applies cv2 fillPoly method to cast the area of interest onto the target image
+</li>
+<li>The results are shown as below
+</li>
+</ul>
+
+<figure>
+<p><img src="file:///home/isaac/Dropbox/udacity/CarND-LaneLines-P1/reflections/roi.png" class="img-responsive" alt="roi.png">
+</p>
+</figure>
+</div>
+</div>
+
+<div id="outline-container-sec-2-5" class="outline-3">
+<h3 id="sec-2-5"><span class="section-number-3">2.5</span> Hough Transformation</h3>
+<div class="outline-text-3" id="text-2-5">
+<ul class="org-ul">
+<li>Define Hough Transformation parameters
+</li>
+<li>Run Hough Transformation on the masked canny edge image to identify lanes
+</li>
+<li>Draw lines/line segments
+</li>
+<li>The results are shown as below
+</li>
+</ul>
+
+<figure>
+<p><img src="file:///home/isaac/Dropbox/udacity/CarND-LaneLines-P1/reflections/hough.png" class="img-responsive" alt="hough.png">
+</p>
+</figure>
+</div>
+</div>
+
+<div id="outline-container-sec-2-6" class="outline-3">
+<h3 id="sec-2-6"><span class="section-number-3">2.6</span> Synthesis</h3>
+<div class="outline-text-3" id="text-2-6">
+<ul class="org-ul">
+<li>Combine All Above Steps into a Pipeline
+</li>
+<li>The final results for all the provided images are as below
+</li>
+</ul>
+
+<figure>
+<p><img src="file:///home/isaac/Dropbox/udacity/CarND-LaneLines-P1/reflections/finalpipeline.png" class="img-responsive" alt="finalpipeline.png">
+</p>
+</figure>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-3" class="outline-2">
+<h2 id="sec-3"><span class="section-number-2">3</span> New Draw Line Function</h2>
+<div class="outline-text-2" id="text-3">
+</div><div id="outline-container-sec-3-1" class="outline-3">
+<h3 id="sec-3-1"><span class="section-number-3">3.1</span> Issues</h3>
+<div class="outline-text-3" id="text-3-1">
+<ul class="org-ul">
+<li>The current draw line function takes in whatever points processed after Hough Transformation.
+</li>
+<li>Applying draw<sub>lines</sub> function to these raw points will only generate segments
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-sec-3-2" class="outline-3">
+<h3 id="sec-3-2"><span class="section-number-3">3.2</span> Solution</h3>
+<div class="outline-text-3" id="text-3-2">
+</div><div id="outline-container-sec-3-2-1" class="outline-4">
+<h4 id="sec-3-2-1"><span class="section-number-4">3.2.1</span> Logic</h4>
+<div class="outline-text-4" id="text-3-2-1">
+<ul class="org-ul">
+<li>The solution logic is fairly simple
+</li>
+<li>Calculate each point pairs' slope and intercept
+</li>
+<li>Separate the point pairs based on positive slope vs. negative slope
+</li>
+<li>Calculate the mean of positive slope, positive intercept, negative slope and negative intercept
+</li>
+<li>For each point pairs check their slope:
+<ul class="org-ul">
+<li>If slope &gt; 0, use positive slope and positive intercept to extrapolate the line
+</li>
+<li>If slope &lt; 0, use negative slope and negative intercept to extrapolate the line
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-sec-3-2-2" class="outline-4">
+<h4 id="sec-3-2-2"><span class="section-number-4">3.2.2</span> Implmentation</h4>
+<div class="outline-text-4" id="text-3-2-2">
+<ul class="org-ul">
+<li>I like use pandas dataframe to process the tabular data
+</li>
+<li>First read in raw points, create a dataframe of four columns ["X1", "Y1", "X2", "Y2"]
+</li>
+<li>Calculate each point pairs' slope and intercept
+</li>
+<li>Calculate mean positive and negative slopes and intercepts
+</li>
+<li>Group slopes based on whether it's positive or negative
+</li>
+<li>Iterate each row
+<ul class="org-ul">
+<li>if slope &gt; 0, calculate Y with positive slope and intercept, then plot extrapolated line
+</li>
+<li>if slope &lt; 0, calculate Y with negative slope and intercept, then plot extrapolated line
+</li>
+</ul>
+</li>
+<li>The new function is called draw<sub>line</sub><sub>new</sub>
+</li>
+<li>Apply draw<sub>line</sub><sub>new</sub>, the image results are as below
+</li>
+</ul>
+
+<figure>
+<p><img src="file:///home/isaac/Dropbox/udacity/CarND-LaneLines-P1/reflections/new_draw_line.png" class="img-responsive" alt="new_draw_line.png">
+</p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-sec-4" class="outline-2">
+<h2 id="sec-4"><span class="section-number-2">4</span> Further Improvement</h2>
+<div class="outline-text-2" id="text-4">
+</div><div id="outline-container-sec-4-1" class="outline-3">
+<h3 id="sec-4-1"><span class="section-number-3">4.1</span> Shortcomings</h3>
+<div class="outline-text-3" id="text-4-1">
+<ul class="org-ul">
+<li>While testing my new draw line functions, the results are pretty bad. The method above are not generalized enough to be applied on the challenge video, due to lane shape (curvy, S-shapes, cross roads ,sharp turns etc.), car distances, lights, reflections, environments&#x2026;
+</li>
+<li>Many parameters are fixed, there's no systematic way to tweak them or optimize them easily. Many cases it's just manual tweaks
+</li>
+<li>I plotted the returned dots after Hough Transformations and the pattern is quite obvious
+</li>
+</ul>
+
+<figure>
+<p><img src="file:///home/isaac/Dropbox/udacity/CarND-LaneLines-P1/reflections/houghplots.png" class="img-responsive" alt="houghplots.png">
+</p>
+</figure>
+</div>
+</div>
+<div id="outline-container-sec-4-2" class="outline-3">
+<h3 id="sec-4-2"><span class="section-number-3">4.2</span> Apply Basic Machine Learning Techniques</h3>
+<div class="outline-text-3" id="text-4-2">
+<ul class="org-ul">
+<li>By checking the scatter plot above, there are two things we can do here
+</li>
+</ul>
+</div>
+<div id="outline-container-sec-4-2-1" class="outline-4">
+<h4 id="sec-4-2-1"><span class="section-number-4">4.2.1</span> Clustering</h4>
+<div class="outline-text-4" id="text-4-2-1">
+<ul class="org-ul">
+<li>For each line, cluster them into two groups (KMeans with n<sub>clusters</sub> = 2)
+</li>
+<li>However the results are not that satisfactory, some blue points should be classified as red.
+</li>
+<li>I'll look into the clustering accuracy later, but now will label each clusters as negative (blue dots) vs. position (red dots). Will create a label column for clustering
+</li>
+</ul>
+
+<figure>
+<p><img src="file:///home/isaac/Dropbox/udacity/CarND-LaneLines-P1/reflections/houghplotscluster.png" class="img-responsive" alt="houghplotscluster.png">
+</p>
+</figure>
+</div>
+</div>
+<div id="outline-container-sec-4-2-2" class="outline-4">
+<h4 id="sec-4-2-2"><span class="section-number-4">4.2.2</span> Regression</h4>
+<div class="outline-text-4" id="text-4-2-2">
+<ul class="org-ul">
+<li>Based on the labeled data run linear regression
+</li>
+<li>Calculate slope (params_) and intercept (intercept_)
+</li>
+<li>Then plot the lines based on calculated slope
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-sec-4-2-3" class="outline-4">
+<h4 id="sec-4-2-3"><span class="section-number-4">4.2.3</span> Results</h4>
+<div class="outline-text-4" id="text-4-2-3">
+<ul class="org-ul">
+<li>The function is called draw<sub>pipeline</sub><sub>general</sub>()
+</li>
+<li>However, the results are not good either
+</li>
+<li>So maybe linear regression is not a good enough model to fit the data
+</li>
+<li>I will look into the possibility of adding more poly features on the fitting for future tweaks
+</li>
+<li>Submit for now for evaluation feedback for other tasks
+</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+</div><div class="col-md-3"><nav id="table-of-contents">
+<div id="text-table-of-contents" class="bs-docs-sidebar">
+<ul class="nav">
+<li><a href="#sec-1">1. Goal</a>
+<ul class="nav">
+<li><a href="#sec-1-1">1.1. Build a Pipeline</a></li>
+<li><a href="#sec-1-2">1.2. Reflection</a></li>
+</ul>
+</li>
+<li><a href="#sec-2">2. Build a Pipeline</a>
+<ul class="nav">
+<li><a href="#sec-2-1">2.1. Convert to Greyscale</a></li>
+<li><a href="#sec-2-2">2.2. Apply Gaussian Smoothing on the Gray Image</a></li>
+<li><a href="#sec-2-3">2.3. Canny Edge</a></li>
+<li><a href="#sec-2-4">2.4. Select Area of Interest</a></li>
+<li><a href="#sec-2-5">2.5. Hough Transformation</a></li>
+<li><a href="#sec-2-6">2.6. Synthesis</a></li>
+</ul>
+</li>
+<li><a href="#sec-3">3. New Draw Line Function</a>
+<ul class="nav">
+<li><a href="#sec-3-1">3.1. Issues</a></li>
+<li><a href="#sec-3-2">3.2. Solution</a></li>
+</ul>
+</li>
+<li><a href="#sec-4">4. Further Improvement</a>
+<ul class="nav">
+<li><a href="#sec-4-1">4.1. Shortcomings</a></li>
+<li><a href="#sec-4-2">4.2. Apply Basic Machine Learning Techniques</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</nav>
+</div></div></div>
+<footer id="postamble" class="">
+<div><p class="author">Author: Isaac Zhou</p>
+<p class="date">Created: 2018-02-18 Sun 20:06</p>
+<p class="creator"><a href="http://www.gnu.org/software/emacs/">Emacs</a> 25.3.2 (<a href="http://orgmode.org">Org-mode</a> 9.1.6)</p>
+</div>
+</footer>
+</body>
+</html>

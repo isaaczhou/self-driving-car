@@ -1,0 +1,100 @@
+#+TITLE: Reflection: Finding Lane Lines on the Road
+* Goal
+  The goals/steps of this project are the following:
+** Build a Pipeline
+   Make a pipeline that finds lane lines on the road
+** Reflection
+   Reflect on your work in a written report
+
+* Build a Pipeline
+  - Describe your pipeline. As part of the description, explain how you modified the draw_lines() function.
+  - My pipeline consisted of the following steps
+
+** Convert to Greyscale
+   - The first step is to convert the images to the grayscale
+   - Use the provided grayscale function
+   - The results are shown as below
+[[/home/isaac/Dropbox/udacity/CarND-LaneLines-P1/reflections/grayscale.png]]
+
+** Apply Gaussian Smoothing on the Gray Image
+   - Then apply the Gaussian Smoothing to suppress the noise
+   - Use the provided gaussian_blur function, apply the kernel of 9
+   - The results are shown as below
+[[/home/isaac/Dropbox/udacity/CarND-LaneLines-P1/reflections/gaussian.png]]
+
+** Canny Edge
+   - Use canny edge to identify the boundaries of an object in an image
+   - Use the provided canny function, from the class I learnt the ratio of low_threshold to high_threshold of 1:2 or 1:3 is recommended by John Canny. So I use the low threshold of 100 and high threshold of 200
+   - The results are shown as below
+[[/home/isaac/Dropbox/udacity/CarND-LaneLines-P1/reflections/cannyedge.png]]
+
+** Select Area of Interest
+   - Define a region of interest based by tweaking vertices
+   - Use region_of_interest function, which applies cv2 fillPoly method to cast the area of interest onto the target image
+   - The results are shown as below
+[[/home/isaac/Dropbox/udacity/CarND-LaneLines-P1/reflections/roi.png]]
+
+** Hough Transformation
+   - Define Hough Transformation parameters
+   - Run Hough Transformation on the masked canny edge image to identify lanes
+   - Draw lines/line segments
+   - The results are shown as below
+[[/home/isaac/Dropbox/udacity/CarND-LaneLines-P1/reflections/hough.png]]
+
+** Synthesis
+   - Combine All Above Steps into a Pipeline
+   - The final results for all the provided images are as below
+[[/home/isaac/Dropbox/udacity/CarND-LaneLines-P1/reflections/finalpipeline.png]]
+
+* New Draw Line Function
+
+** Issues
+   - The current draw line function takes in whatever points processed after Hough Transformation.
+   - Applying draw_lines function to these raw points will only generate segments
+
+** Solution
+
+*** Logic
+    - The solution logic is fairly simple
+    - Calculate each point pairs' slope and intercept
+    - Separate the point pairs based on positive slope vs. negative slope
+    - Calculate the mean of positive slope, positive intercept, negative slope and negative intercept
+    - For each point pairs check their slope:
+      + If slope > 0, use positive slope and positive intercept to extrapolate the line
+      + If slope < 0, use negative slope and negative intercept to extrapolate the line
+*** Implmentation
+    - I like use pandas dataframe to process the tabular data
+    - First read in raw points, create a dataframe of four columns ["X1", "Y1", "X2", "Y2"]
+    - Calculate each point pairs' slope and intercept
+    - Calculate mean positive and negative slopes and intercepts
+    - Group slopes based on whether it's positive or negative
+    - Iterate each row
+      + if slope > 0, calculate Y with positive slope and intercept, then plot extrapolated line
+      + if slope < 0, calculate Y with negative slope and intercept, then plot extrapolated line
+    - The new function is called draw_line_new
+    - Apply draw_line_new, the image results are as below
+[[/home/isaac/Dropbox/udacity/CarND-LaneLines-P1/reflections/new_draw_line.png]]
+
+* Further Improvement
+** Shortcomings
+  - While testing my new draw line functions, the results are pretty bad. The method above are not generalized enough to be applied on the challenge video, due to lane shape (curvy, S-shapes, cross roads ,sharp turns etc.), car distances, lights, reflections, environments...
+  - Many parameters are fixed, there's no systematic way to tweak them or optimize them easily. Many cases it's just manual tweaks
+  - I plotted the returned dots after Hough Transformations and the pattern is quite obvious
+[[/home/isaac/Dropbox/udacity/CarND-LaneLines-P1/reflections/houghplots.png]]
+** Apply Basic Machine Learning Techniques
+   - By checking the scatter plot above, there are two things we can do here
+*** Clustering
+    - For each line, cluster them into two groups (KMeans with n_clusters = 2)
+    - However the results are not that satisfactory, some blue points should be classified as red.
+    - I'll look into the clustering accuracy later, but now will label each clusters as negative (blue dots) vs. position (red dots). Will create a label column for clustering
+[[/home/isaac/Dropbox/udacity/CarND-LaneLines-P1/reflections/houghplotscluster.png]]
+*** Regression
+    - Based on the labeled data run linear regression
+    - Calculate slope (params_) and intercept (intercept_)
+    - Then plot the lines based on calculated slope
+*** Results
+    - The function is called draw_pipeline_general()
+    - However, the results are not good either
+    - So maybe linear regression is not a good enough model to fit the data
+    - I will look into the possibility of adding more poly features on the fitting for future tweaks
+    - Submit for now for evaluation feedback for other tasks
