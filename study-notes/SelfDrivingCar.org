@@ -1030,4 +1030,4 @@ def trainLR(X, y, learn_rate = 0.01, num_epochs = 100):
     - Linear regression helps predict values on a continuous spectrum
     - Logistic regression helps predict classification data
 
-*** 
+*** Perceptons
