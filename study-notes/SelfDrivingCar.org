@@ -1018,3 +1018,16 @@ def trainLR(X, y, learn_rate = 0.01, num_epochs = 100):
 
 *** Gradient Descent: The Code
 
+** Intro to Neural Networks
+
+*** What is machine learning
+    - a field of artificial intelligence that relies on computers to learn about the environment from data, instead of relying on the rule set by computer programmers
+
+*** Linear Regression
+    - use known drivers/prices to predict unknown target price, which doesn't exist
+
+*** Linear Regression to Logistic Regression
+    - Linear regression helps predict values on a continuous spectrum
+    - Logistic regression helps predict classification data
+
+*** 
