@@ -1031,3 +1031,4 @@ def trainLR(X, y, learn_rate = 0.01, num_epochs = 100):
     - Logistic regression helps predict classification data
 
 *** Perceptons
+*** <2018-04-11 Wed>
